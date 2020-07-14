@@ -1,0 +1,15 @@
+<ion-content [scrollEvents]="true" (ionScroll)="onScroll($event)">
+  <h1>Repositories</h1>
+  <br/>
+  <ion-list *ngFor="let repository of repositories">
+    <app-repository [repository]="repository"></app-repository>
+  </ion-list>
+
+  <ion-infinite-scroll (ionInfinite)="getRepositories($event)"
+                       threshold="100px">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more data...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

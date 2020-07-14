@@ -1,0 +1,12 @@
+<ion-card class="repository-card">
+  <ion-item>
+    <h1>{{ repository.name }}</h1>
+  </ion-item>
+  <ion-card-content>
+    <h6>{{ repository.id }}</h6>
+  </ion-card-content>
+  <ion-row>
+    <ion-icon name="star-outline" *ngIf="!repository.viewerHasStarred"></ion-icon>
+    <ion-icon name="star" *ngIf="repository.viewerHasStarred"></ion-icon>
+  </ion-row>
+</ion-card>

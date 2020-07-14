@@ -1,0 +1,12 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      GitHub
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <h1 class="h1">List of Users</h1>
+  <app-user-list *ngIf="dataAvailable" [users]="users" [pageInfo]="pageInfo"></app-user-list>
+</ion-content>

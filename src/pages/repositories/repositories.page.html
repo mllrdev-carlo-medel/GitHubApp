@@ -1,0 +1,8 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>GitHub</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <app-repository-list *ngIf="dataAvailable" [repositories]="repositories" [loginId]="loginId" [pageInfo]="pageInfo"></app-repository-list>
+</ion-content>
