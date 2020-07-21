@@ -28,7 +28,8 @@ export class RepositoryService extends BaseService {
       variables: {
         login: userLogin,
         cursor
-      }
+      },
+      fetchPolicy: 'cache-first'
     });
   }
 }

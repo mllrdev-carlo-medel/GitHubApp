@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BaseService } from '../base-service/base.service';
 import { gql } from 'apollo-boost';
-import { Variable } from '@angular/compiler/src/render3/r3_ast';
 
 @Injectable()
 export class UserService extends BaseService {
@@ -24,6 +23,9 @@ export class UserService extends BaseService {
       }
     `;
 
-    return await this.client.query({query: GET_USERS, variables: { cursor }});
+    return await this.client.query({
+      query: GET_USERS,
+      variables: { cursor },
+      fetchPolicy: 'cache-first'});
   }
 }

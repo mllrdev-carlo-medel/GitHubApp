@@ -28,9 +28,9 @@ export class RepositoriesPage implements OnInit {
 
   async getRepositories(loginId: string) {
     await this.repositoryService.getRepositories(loginId).then(({data}) => {
-      this.repositories = data.user.repositories.nodes;
-      this.pageInfo = data.user.repositories.pageInfo;
-      this.dataAvailable = true;
+       this.repositories = data.user.repositories.nodes;
+       this.pageInfo = data.user.repositories.pageInfo;
+       this.dataAvailable = true;
     });
   }
 }

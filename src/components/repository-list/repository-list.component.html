@@ -6,7 +6,8 @@
   </ion-list>
 
   <ion-infinite-scroll (ionInfinite)="getRepositories($event)"
-                       threshold="100px">
+                       threshold="100px"
+                       [disabled]="disableInfiniteScrolling">
     <ion-infinite-scroll-content
       loadingSpinner="bubbles"
       loadingText="Loading more data...">

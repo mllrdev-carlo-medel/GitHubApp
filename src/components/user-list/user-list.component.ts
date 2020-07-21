@@ -13,10 +13,13 @@ export class UserListComponent implements OnInit {
   @Input() pageInfo: IPageInfo;
   scrollingDown = false;
 
+  disableInfiniteScrolling = false;
+
   constructor(private userService: UserService) {
   }
 
   ngOnInit() {
+     this.userService.getUsers(this.pageInfo.endCursor).then();
   }
 
   async getUsers(event) {
@@ -24,6 +27,13 @@ export class UserListComponent implements OnInit {
       if (this.scrollingDown && this.pageInfo.hasNextPage) {
         this.users.push(...data.search.nodes);
         this.pageInfo = data.search.pageInfo;
+
+        if (this.pageInfo.hasNextPage) {
+          this.userService.getUsers(this.pageInfo.endCursor).then();
+        }
+        else {
+          this.disableInfiniteScrolling = true;
+        }
 
         event.target.complete();
       }

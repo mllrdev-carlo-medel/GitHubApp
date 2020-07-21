@@ -1,15 +1,17 @@
 import { Injectable } from '@angular/core';
-import ApolloClient, { gql } from 'apollo-boost';
+import ApolloClient, { gql, InMemoryCache } from 'apollo-boost';
 
 
 @Injectable()
 export class BaseService {
+  private cache = new InMemoryCache();
   protected client = new ApolloClient({
+    cache: this.cache,
     uri: 'https://api.github.com/graphql',
     request: operation => {
       operation.setContext({
         headers: {
-          authorization: `Bearer c824d3abc6307a982dd6524f905d5cb1d4da5168`,
+          authorization: `Bearer 82d9843573ff90b5744033aef876aa7a8ae99de7`,
         },
       });
     }

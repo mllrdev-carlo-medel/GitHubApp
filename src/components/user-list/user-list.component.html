@@ -4,7 +4,8 @@
   </ion-list>
 
   <ion-infinite-scroll (ionInfinite)="getUsers($event)"
-                       threshold="100px">
+                       threshold="100px"
+                       [disabled]="disableInfiniteScrolling">
     <ion-infinite-scroll-content
       loadingSpinner="bubbles"
       loadingText="Loading more data...">
