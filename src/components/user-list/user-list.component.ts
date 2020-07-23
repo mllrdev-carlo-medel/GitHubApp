@@ -25,13 +25,12 @@ export class UserListComponent implements OnInit {
   async getUsers(event) {
     await this.userService.getUsers(this.pageInfo.endCursor).then(({data}) => {
       if (this.scrollingDown && this.pageInfo.hasNextPage) {
-        this.users.push(...data.search.nodes);
+        this.users.push(...data.search.nodes.splice(this.users.length));
         this.pageInfo = data.search.pageInfo;
 
-        if (this.pageInfo.hasNextPage) {
-          this.getNextUsers(this.pageInfo.endCursor);
-        }
-        else {
+        this.getNextUsers(this.pageInfo.endCursor);
+
+        if (!this.pageInfo.hasNextPage) {
           this.disableInfiniteScrolling = true;
         }
 
@@ -41,7 +40,11 @@ export class UserListComponent implements OnInit {
   }
 
   getNextUsers(cursor: string) {
-    this.userService.getUsers(cursor).then();
+    if (this.pageInfo.hasNextPage) {
+      this.userService.getUsers(cursor, true).then(({data}) => {
+        this.userService.updateUsersCache(data);
+      });
+    }
   }
 
   onScroll(event) {

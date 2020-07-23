@@ -24,13 +24,12 @@ export class RepositoryListComponent implements OnInit {
   async getRepositories(event) {
     await this.repositoryService.getRepositories(this.loginId, this.pageInfo.endCursor).then(({ data }) => {
       if (this.scrollingDown && this.pageInfo.hasNextPage) {
-        this.repositories.push(...data.user.repositories.nodes);
+        this.repositories.push(...data.user.repositories.nodes.slice(this.repositories.length));
         this.pageInfo = data.user.repositories.pageInfo;
 
-        if (this.pageInfo.hasNextPage) {
-          this.getNextRepositories(this.loginId, this.pageInfo.endCursor);
-        }
-        else {
+        this.getNextRepositories(this.loginId, this.pageInfo.endCursor);
+
+        if (!this.pageInfo.hasNextPage) {
           this.disableInfiniteScrolling = true;
         }
       }
@@ -39,7 +38,11 @@ export class RepositoryListComponent implements OnInit {
   }
 
   getNextRepositories(id: string, cursor: string) {
-    this.repositoryService.getRepositories(id, cursor).then();
+    if (this.pageInfo.hasNextPage) {
+      this.repositoryService.getRepositories(id, cursor, true).then(({data}) => {
+        this.repositoryService.updateRepositoryCache(id, data);
+      });
+    }
   }
 
   onScroll(event) {

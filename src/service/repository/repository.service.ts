@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BaseService } from '../base-service/base.service';
 import { gql } from 'apollo-boost';
+import { GET_REPOSITORIES, GET_REPO_COUNT } from 'src/shared/constants/RepositoryQueries';
 
 @Injectable()
 export class RepositoryService extends BaseService {
@@ -13,43 +14,34 @@ export class RepositoryService extends BaseService {
     });
   }
 
-  async getRepositories(userLogin: string, cursor: string = null) {
-    const GET_REPOSITORIES = gql`
-      query($login: String!, $cursor: String) {
-        user(login: $login) {
-          repositories(first: 10 after: $cursor) {
-            nodes {
-      	      name
-              id
-              viewerHasStarred
-      	    }
-            pageInfo {
-              endCursor
-              hasNextPage
-            }
-          }
-        }
-      }
-    `;
-
+  async getRepositories(userLogin: string, cursor: string = null, fetchFromNetwork: boolean = false) {
     return await this.client.query({
       query: GET_REPOSITORIES,
       variables: {
         login: userLogin,
         cursor
       },
-      fetchPolicy: 'cache-first'
+      fetchPolicy: fetchFromNetwork ? 'no-cache' : 'cache-first'
     });
   }
 
-  async getRepositoryPageNavCount() {
-    const GET_COUNT = gql`
-      query {
-        repositoryPageNavCount @client
-      }
-    `;
+  updateRepositoryCache(login: string, data: any) {
+    try {
+      const cacheData = this.client.readQuery({query: GET_REPOSITORIES, variables: { login }});
 
-    return await this.client.query({query: GET_COUNT});
+      cacheData.user.repositories.pageInfo = data.user.repositories.pageInfo;
+      cacheData.user.repositories.nodes = [...cacheData.user.repositories.nodes, ...data.user.repositories.nodes];
+
+      this.client.writeQuery({query: GET_REPOSITORIES, data: cacheData});
+    }
+    catch (Exception) {
+      console.log(Exception);
+      return;
+    }
+  }
+
+  async getRepositoryPageNavCount() {
+    return await this.client.query({query: GET_REPO_COUNT});
   }
 
   incrementRepositoryNavCount() {
