@@ -19,6 +19,14 @@ export class HomePage implements OnInit {
 
   ngOnInit() {
     this.getUsers();
+    this.incrementUserPageNavCount();
+  }
+
+  incrementUserPageNavCount() {
+    this.userService.incrementPageNavCount();
+    this.userService.getUserPageNavCount().then(({data}) => {
+      console.log(data.userPageNavCount);
+    });
   }
 
   async getUsers() {

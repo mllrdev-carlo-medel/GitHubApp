@@ -39,7 +39,7 @@ export class RepositoryListComponent implements OnInit {
   }
 
   getNextRepositories(id: string, cursor: string) {
-    this.repositoryService.getRepositories(id, cursor).then(console.log);
+    this.repositoryService.getRepositories(id, cursor).then();
   }
 
   onScroll(event) {

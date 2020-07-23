@@ -4,6 +4,15 @@ import { gql } from 'apollo-boost';
 
 @Injectable()
 export class RepositoryService extends BaseService {
+  static repositoryPageNavCount = 0;
+
+  constructor() {
+    super();
+    this.client.cache.writeData({
+      data: { repositoryPageNavCount: RepositoryService.repositoryPageNavCount }
+    });
+  }
+
   async getRepositories(userLogin: string, cursor: string = null) {
     const GET_REPOSITORIES = gql`
       query($login: String!, $cursor: String) {
@@ -31,5 +40,19 @@ export class RepositoryService extends BaseService {
       },
       fetchPolicy: 'cache-first'
     });
+  }
+
+  async getRepositoryPageNavCount() {
+    const GET_COUNT = gql`
+      query {
+        repositoryPageNavCount @client
+      }
+    `;
+
+    return await this.client.query({query: GET_COUNT});
+  }
+
+  incrementRepositoryNavCount() {
+    this.client.cache.writeData({ data: {repositoryPageNavCount: ++RepositoryService.repositoryPageNavCount} });
   }
 }

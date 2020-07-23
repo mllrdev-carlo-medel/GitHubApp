@@ -20,6 +20,14 @@ export class RepositoriesPage implements OnInit {
   ngOnInit() {
     this.getLoginId();
     this.getRepositories(this.loginId);
+    this.incrementRepositoryPageNavCount();
+  }
+
+  incrementRepositoryPageNavCount() {
+    this.repositoryService.incrementRepositoryNavCount();
+    this.repositoryService.getRepositoryPageNavCount().then(({data}) => {
+      console.log(data.repositoryPageNavCount);
+    });
   }
 
   getLoginId() {

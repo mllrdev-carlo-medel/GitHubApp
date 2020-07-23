@@ -19,7 +19,7 @@ export class UserListComponent implements OnInit {
   }
 
   ngOnInit() {
-     this.userService.getUsers(this.pageInfo.endCursor).then();
+     this.getNextUsers(this.pageInfo.endCursor);
   }
 
   async getUsers(event) {
@@ -29,7 +29,7 @@ export class UserListComponent implements OnInit {
         this.pageInfo = data.search.pageInfo;
 
         if (this.pageInfo.hasNextPage) {
-          this.userService.getUsers(this.pageInfo.endCursor).then();
+          this.getNextUsers(this.pageInfo.endCursor);
         }
         else {
           this.disableInfiniteScrolling = true;
@@ -38,6 +38,10 @@ export class UserListComponent implements OnInit {
         event.target.complete();
       }
     });
+  }
+
+  getNextUsers(cursor: string) {
+    this.userService.getUsers(cursor).then();
   }
 
   onScroll(event) {
