@@ -1,8 +1,9 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { IRepository } from 'src/model/interfaces/IRepository';
-import { IPageInfo } from 'src/model/interfaces/IPageInfo';
-import { RepositoryService } from 'src/service/repository/repository.service';
+import { IRepository } from 'src/core/interfaces/IRepository';
+import { IPageInfo } from 'src/core/interfaces/IPageInfo';
+import { RepositoryService } from 'src/core/services/repository/repository.service';
+import { QueryRef } from 'apollo-angular';
 
 @Component({
   selector: 'app-repositories',
@@ -10,10 +11,10 @@ import { RepositoryService } from 'src/service/repository/repository.service';
   styleUrls: ['./repositories.page.scss'],
 })
 export class RepositoriesPage implements OnInit {
-  repositories: IRepository[];
-  pageInfo: IPageInfo = null;
-  loginId: string;
-  dataAvailable = false;
+  repositories: IRepository[] = [];
+  pageInfo!: IPageInfo;
+  loginId!: string;
+  fetchRepositoriesQuery!: QueryRef<any>;
   constructor(private route: ActivatedRoute,
               private repositoryService: RepositoryService) { }
 
@@ -25,20 +26,21 @@ export class RepositoriesPage implements OnInit {
 
   incrementRepositoryPageNavCount() {
     this.repositoryService.incrementRepositoryNavCount();
-    this.repositoryService.getRepositoryPageNavCount().then(({data}) => {
-      console.log(data.repositoryPageNavCount);
+    this.repositoryService.getRepositoryPageNavCount().subscribe(({data}) => {
+      console.log(data);
     });
   }
 
   getLoginId() {
-    this.loginId = this.route.snapshot.paramMap.get('id');
+    const value = this.route.snapshot.paramMap.get('id');
+    this.loginId = value ? value : '';
   }
 
-  async getRepositories(loginId: string) {
-    await this.repositoryService.getRepositories(loginId).then(({data}) => {
+  getRepositories(loginId: string) {
+    this.fetchRepositoriesQuery = this.repositoryService.getRepositories(loginId);
+    this.fetchRepositoriesQuery.valueChanges.subscribe(({data}) => {
        this.repositories = data.user.repositories.nodes;
        this.pageInfo = data.user.repositories.pageInfo;
-       this.dataAvailable = true;
     });
   }
 }

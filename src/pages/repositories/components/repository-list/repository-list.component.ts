@@ -1,7 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { IRepository } from 'src/model/interfaces/IRepository';
-import { IPageInfo } from 'src/model/interfaces/IPageInfo';
-import { RepositoryService } from 'src/service/repository/repository.service';
+import { IRepository } from 'src/core/interfaces/IRepository';
+import { IPageInfo } from 'src/core/interfaces/IPageInfo';
+import { RepositoryService } from 'src/core/services/repository/repository.service';
+import { QueryRef } from 'apollo-angular';
 
 @Component({
   selector: 'app-repository-list',
@@ -9,9 +10,10 @@ import { RepositoryService } from 'src/service/repository/repository.service';
   styleUrls: ['./repository-list.component.scss'],
 })
 export class RepositoryListComponent implements OnInit {
-  @Input() loginId: string;
-  @Input() repositories: IRepository[];
-  @Input() pageInfo: IPageInfo = null;
+  @Input() loginId!: string;
+  @Input() repositories: IRepository[] = [];
+  @Input() pageInfo!: IPageInfo;
+  @Input() fetchRepositoriesQuery!: QueryRef<any>;
   scrollingDown = false;
   disableInfiniteScrolling = false;
 
@@ -21,31 +23,31 @@ export class RepositoryListComponent implements OnInit {
     this.getNextRepositories(this.loginId, this.pageInfo.endCursor);
   }
 
-  async getRepositories(event) {
-    await this.repositoryService.getRepositories(this.loginId, this.pageInfo.endCursor).then(({ data }) => {
+  getRepositories(event: { target: { complete: () => void; }; }) {
+    this.fetchRepositoriesQuery = this.repositoryService.getRepositories(this.loginId, this.pageInfo.endCursor, false);
+    this.fetchRepositoriesQuery.valueChanges.subscribe(({ data }) => {
       if (this.scrollingDown && this.pageInfo.hasNextPage) {
         this.repositories.push(...data.user.repositories.nodes.slice(this.repositories.length));
         this.pageInfo = data.user.repositories.pageInfo;
-
-        this.getNextRepositories(this.loginId, this.pageInfo.endCursor);
 
         if (!this.pageInfo.hasNextPage) {
           this.disableInfiniteScrolling = true;
         }
       }
-      event.target.complete();
     });
+
+    this.getNextRepositories(this.loginId, this.pageInfo.endCursor);
+
+    event.target.complete();
   }
 
   getNextRepositories(id: string, cursor: string) {
     if (this.pageInfo.hasNextPage) {
-      this.repositoryService.getRepositories(id, cursor, true).then(({data}) => {
-        this.repositoryService.updateRepositoryCache(id, data);
-      });
+      this.repositoryService.fetchMoreRepositories(this.fetchRepositoriesQuery, this.pageInfo.endCursor);
     }
   }
 
-  onScroll(event) {
+  onScroll(event: CustomEvent) {
     if (event.detail.deltaY > 0) {
       this.scrollingDown = true;
     } else {

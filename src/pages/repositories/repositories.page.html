@@ -4,5 +4,6 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <app-repository-list *ngIf="dataAvailable" [repositories]="repositories" [loginId]="loginId" [pageInfo]="pageInfo"></app-repository-list>
+  <app-repository-list *ngIf="repositories.length" [repositories]="repositories" [loginId]="loginId"
+                       [pageInfo]="pageInfo" [fetchRepositoriesQuery]="fetchRepositoriesQuery"></app-repository-list>
 </ion-content>

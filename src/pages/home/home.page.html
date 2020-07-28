@@ -8,5 +8,5 @@
 
 <ion-content padding>
   <h1 class="h1">List of Users</h1>
-  <app-user-list *ngIf="dataAvailable" [users]="users" [pageInfo]="pageInfo"></app-user-list>
+  <app-user-list *ngIf="users.length" [users]="users" [pageInfo]="pageInfo"  [fetchUsersQuery]="fetchUsersQuery"></app-user-list>
 </ion-content>

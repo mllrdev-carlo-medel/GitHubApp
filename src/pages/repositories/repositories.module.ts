@@ -8,6 +8,8 @@ import { RepositoriesPageRoutingModule } from './repositories-routing.module';
 
 import { RepositoriesPage } from './repositories.page';
 import { SharedModule } from 'src/shared/shared.module';
+import { RepositoryComponent } from './components/repository/repository.component';
+import { RepositoryListComponent } from './components/repository-list/repository-list.component';
 
 @NgModule({
   imports: [
@@ -17,6 +19,10 @@ import { SharedModule } from 'src/shared/shared.module';
     RepositoriesPageRoutingModule,
     SharedModule
   ],
-  declarations: [RepositoriesPage]
+  declarations: [
+    RepositoriesPage,
+    RepositoryComponent,
+    RepositoryListComponent
+  ]
 })
 export class RepositoriesPageModule {}

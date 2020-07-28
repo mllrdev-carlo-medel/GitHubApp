@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { IRepository } from 'src/model/interfaces/IRepository';
+import { IRepository } from 'src/core/interfaces/IRepository';
 
 @Component({
   selector: 'app-repository',
@@ -7,7 +7,7 @@ import { IRepository } from 'src/model/interfaces/IRepository';
   styleUrls: ['./repository.component.scss'],
 })
 export class RepositoryComponent implements OnInit {
-  @Input() repository: IRepository;
+  @Input() repository!: IRepository;
 
   constructor() { }
 

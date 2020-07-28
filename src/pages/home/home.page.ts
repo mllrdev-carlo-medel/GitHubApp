@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { IUser } from 'src/model/interfaces/IUser';
-import { IPageInfo } from 'src/model/interfaces/IPageInfo';
-import { UserService } from 'src/service/user/user.service';
+import { IUser } from 'src/core/interfaces/IUser';
+import { IPageInfo } from 'src/core/interfaces/IPageInfo';
+import { UserService } from 'src/core/services/user/user.service';
+import { QueryRef } from 'apollo-angular';
 
 @Component({
   selector: 'app-home',
@@ -11,9 +12,9 @@ import { UserService } from 'src/service/user/user.service';
 export class HomePage implements OnInit {
   users: IUser[] = [];
 
-  pageInfo: IPageInfo;
+  pageInfo!: IPageInfo;
 
-  dataAvailable = false;
+  fetchUsersQuery!: QueryRef<any>;
 
   constructor(private userService: UserService) {}
 
@@ -24,16 +25,16 @@ export class HomePage implements OnInit {
 
   incrementUserPageNavCount() {
     this.userService.incrementPageNavCount();
-    this.userService.getUserPageNavCount().then(({data}) => {
-      console.log(data.userPageNavCount);
+    this.userService.getUserPageNavCount().subscribe(({data}) => {
+      console.log(data);
     });
   }
 
-  async getUsers() {
-    await this.userService.getUsers().then(({data}) => {
+  getUsers() {
+    this.fetchUsersQuery = this.userService.getUsers();
+    this.fetchUsersQuery.valueChanges.subscribe(({data}) => {
       this.users = data.search.nodes;
       this.pageInfo = data.search.pageInfo;
-      this.dataAvailable = true;
     });
   }
 }

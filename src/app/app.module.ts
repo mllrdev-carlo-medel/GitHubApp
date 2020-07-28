@@ -6,10 +6,16 @@ import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 
+
+import { HttpClientModule } from '@angular/common/http';
+import { HttpLinkModule, HttpLink } from 'apollo-angular-link-http';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { ApolloModule, Apollo } from 'apollo-angular';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { SharedModule } from 'src/shared/shared.module';
-import { ServiceModule } from 'src/service/service.module';
+import { GraphQLModule } from './graphql.module';
+import { CoreModule } from 'src/core/core.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -19,7 +25,8 @@ import { ServiceModule } from 'src/service/service.module';
     IonicModule.forRoot(),
     AppRoutingModule,
     SharedModule,
-    ServiceModule
+    CoreModule,
+    GraphQLModule
   ],
   providers: [
     StatusBar,
@@ -28,4 +35,4 @@ import { ServiceModule } from 'src/service/service.module';
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule {}
+export class AppModule { }

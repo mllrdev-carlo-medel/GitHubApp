@@ -1,7 +1,9 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { IUser } from 'src/model/interfaces/IUser';
-import { UserService } from 'src/service/user/user.service';
-import { IPageInfo } from 'src/model/interfaces/IPageInfo';
+import { IUser } from 'src/core/interfaces/IUser';
+import { UserService } from 'src/core/services/user/user.service';
+import { IPageInfo } from 'src/core/interfaces/IPageInfo';
+import { QueryRef } from 'apollo-angular';
+import { IonInfiniteScroll } from '@ionic/angular';
 
 @Component({
   selector: 'app-user-list',
@@ -10,7 +12,8 @@ import { IPageInfo } from 'src/model/interfaces/IPageInfo';
 })
 export class UserListComponent implements OnInit {
   @Input() users: IUser[] = [];
-  @Input() pageInfo: IPageInfo;
+  @Input() pageInfo!: IPageInfo;
+  @Input() fetchUsersQuery!: QueryRef<any>;
   scrollingDown = false;
 
   disableInfiniteScrolling = false;
@@ -22,32 +25,31 @@ export class UserListComponent implements OnInit {
      this.getNextUsers(this.pageInfo.endCursor);
   }
 
-  async getUsers(event) {
-    await this.userService.getUsers(this.pageInfo.endCursor).then(({data}) => {
+  getUsers(event: { target: { complete: () => void; }; }) {
+    this.fetchUsersQuery = this.userService.getUsers(this.pageInfo.endCursor, false);
+    this.fetchUsersQuery.valueChanges.subscribe(({data}) => {
       if (this.scrollingDown && this.pageInfo.hasNextPage) {
         this.users.push(...data.search.nodes.splice(this.users.length));
         this.pageInfo = data.search.pageInfo;
 
-        this.getNextUsers(this.pageInfo.endCursor);
-
         if (!this.pageInfo.hasNextPage) {
           this.disableInfiniteScrolling = true;
         }
-
-        event.target.complete();
       }
     });
+
+    this.getNextUsers(this.pageInfo.endCursor);
+
+    event.target.complete();
   }
 
   getNextUsers(cursor: string) {
     if (this.pageInfo.hasNextPage) {
-      this.userService.getUsers(cursor, true).then(({data}) => {
-        this.userService.updateUsersCache(data);
-      });
+      this.userService.fetchMoreUsers(this.fetchUsersQuery, this.pageInfo.endCursor);
     }
   }
 
-  onScroll(event) {
+  onScroll(event: CustomEvent) {
     if (event.detail.deltaY > 0) {
      this.scrollingDown = true;
     }
