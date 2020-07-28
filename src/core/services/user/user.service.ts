@@ -1,33 +1,31 @@
 import { Injectable, OnInit } from '@angular/core';
-import { GET_USERS, GET_USER_COUNT } from '../../../shared/constants/UserQueries';
+import { GET_USER_COUNT } from '../../../shared/constants/UserQueries';
 import { Apollo, QueryRef } from 'apollo-angular';
+import { GetUsersGQL, GetUsersQuery, GetUsersQueryVariables } from 'src/app/graphql/generated/graphql';
 
 @Injectable()
 export class UserService {
   static userPageNavCount = 0;
 
-  constructor(private apollo: Apollo) {}
+  constructor(private apollo: Apollo,
+              private getUsersGql: GetUsersGQL) {}
 
-  getUsers(cursor: string | null = null, fetchFromNetwork: boolean = true) {
-    return this.apollo.watchQuery<any>({
-      query: GET_USERS,
-      variables: { cursor },
-      fetchPolicy: fetchFromNetwork ? 'network-only' : 'cache-first',
-    });
+  getUsers(cursor: string | null = null) {
+    return this.getUsersGql.watch({cursor});
   }
 
-  fetchMoreUsers(fetchUsersQuery: QueryRef<any>, cursor: string) {
+  fetchMoreUsers(fetchUsersQuery: QueryRef<GetUsersQuery, GetUsersQueryVariables>, cursor?: string) {
     fetchUsersQuery.fetchMore({
       variables: { cursor },
       updateQuery: (prev, { fetchMoreResult }) => {
-        if (!fetchMoreResult) {
+        if (!fetchMoreResult?.search.nodes) {
           return prev;
         }
 
-        fetchMoreResult.search.nodes = [
-          ...prev.search.nodes,
-          ...fetchMoreResult.search.nodes,
-        ];
+        if (prev.search.nodes) {
+          fetchMoreResult.search.nodes = [...prev.search.nodes, ...fetchMoreResult.search.nodes];
+        }
+
         return fetchMoreResult;
       },
     });
@@ -45,3 +43,4 @@ export class UserService {
       });
   }
 }
+

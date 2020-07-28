@@ -1,37 +1,34 @@
 import { Injectable } from '@angular/core';
-import { GET_REPOSITORIES, GET_REPO_COUNT } from 'src/shared/constants/RepositoryQueries';
+import { GET_REPO_COUNT } from 'src/shared/constants/RepositoryQueries';
 import { Apollo, QueryRef } from 'apollo-angular';
+import { GetRepositoriesGQL, GetRepositoriesQuery, GetRepositoriesQueryVariables } from 'src/app/graphql/generated/graphql';
 
 @Injectable()
 export class RepositoryService {
   static repositoryPageNavCount = 0;
 
-  constructor(private apollo: Apollo) {}
+  constructor(private apollo: Apollo,
+              private getRepositoriesGql: GetRepositoriesGQL) {}
 
-  getRepositories(userLogin: string, cursor: string | null = null, fetchFromNetwork: boolean = true) {
-    return this.apollo.watchQuery<any>({
-      query: GET_REPOSITORIES,
-      variables: {
-        login: userLogin,
-        cursor
-      },
-      fetchPolicy: fetchFromNetwork ? 'network-only' : 'cache-first',
-    });
+  getRepositories(userLogin: string, cursor: string | null = null) {
+    return this.getRepositoriesGql.watch({login: userLogin, cursor});
   }
 
-  fetchMoreRepositories(fetchUsersQuery: QueryRef<any>, cursor: string) {
+  fetchMoreRepositories(fetchUsersQuery: QueryRef<GetRepositoriesQuery, GetRepositoriesQueryVariables>, cursor?: string) {
     fetchUsersQuery.fetchMore({
       variables: { cursor },
       updateQuery: (prev, { fetchMoreResult }) => {
 
-        if (!fetchMoreResult) {
+        if (!fetchMoreResult?.user?.repositories.nodes) {
           return prev;
         }
 
-        fetchMoreResult.user.repositories.nodes = [
-          ...prev.user.repositories.nodes,
-          ...fetchMoreResult.user.repositories.nodes,
-        ];
+        if (prev.user?.repositories.nodes) {
+          fetchMoreResult.user.repositories.nodes = [
+            ...prev.user.repositories.nodes,
+            ...fetchMoreResult.user.repositories.nodes,
+          ];
+        }
 
         return fetchMoreResult;
       },

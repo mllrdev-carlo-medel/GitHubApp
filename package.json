@@ -9,7 +9,8 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "graphql": "graphql-codegen --config ./codegen.yml"
   },
   "private": true,
   "dependencies": {
@@ -42,10 +43,11 @@
     "@angular/compiler": "~9.1.6",
     "@angular/compiler-cli": "~9.1.6",
     "@angular/language-service": "~9.1.6",
+    "@graphql-codegen/cli": "1.17.6",
     "@ionic/angular-toolkit": "^2.1.1",
-    "@types/node": "^12.11.1",
     "@types/jasmine": "~3.5.0",
     "@types/jasminewd2": "~2.0.3",
+    "@types/node": "^12.11.1",
     "codelyzer": "^5.1.2",
     "jasmine-core": "~3.5.0",
     "jasmine-spec-reporter": "~4.2.1",
@@ -57,7 +59,10 @@
     "protractor": "~5.4.3",
     "ts-node": "~8.3.0",
     "tslint": "~6.1.0",
-    "typescript": "~3.8.3"
+    "typescript": "~3.8.3",
+    "@graphql-codegen/typescript": "1.17.6",
+    "@graphql-codegen/typescript-operations": "1.17.6",
+    "@graphql-codegen/typescript-apollo-angular": "1.17.6"
   },
   "description": "An Ionic project"
 }

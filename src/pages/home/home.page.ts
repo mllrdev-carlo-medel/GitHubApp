@@ -3,6 +3,8 @@ import { IUser } from 'src/core/interfaces/IUser';
 import { IPageInfo } from 'src/core/interfaces/IPageInfo';
 import { UserService } from 'src/core/services/user/user.service';
 import { QueryRef } from 'apollo-angular';
+import { map } from 'rxjs/operators';
+import { GetUsersQuery, GetUsersQueryVariables, User } from 'src/app/graphql/generated/graphql';
 
 @Component({
   selector: 'app-home',
@@ -11,10 +13,8 @@ import { QueryRef } from 'apollo-angular';
 })
 export class HomePage implements OnInit {
   users: IUser[] = [];
-
   pageInfo!: IPageInfo;
-
-  fetchUsersQuery!: QueryRef<any>;
+  fetchUsersQuery!: QueryRef<GetUsersQuery, GetUsersQueryVariables>;
 
   constructor(private userService: UserService) {}
 
@@ -32,9 +32,20 @@ export class HomePage implements OnInit {
 
   getUsers() {
     this.fetchUsersQuery = this.userService.getUsers();
-    this.fetchUsersQuery.valueChanges.subscribe(({data}) => {
-      this.users = data.search.nodes;
-      this.pageInfo = data.search.pageInfo;
+    this.fetchUsersQuery.valueChanges.subscribe((result) => {
+
+      if (result.data.search.pageInfo.endCursor) {
+        this.pageInfo = {
+          endCursor: result.data.search.pageInfo.endCursor,
+          hasNextPage: result.data.search.pageInfo.hasNextPage
+        };
+
+        const users: IUser[] = [];
+        result.data.search.nodes?.slice(this.users.length).map(node => {
+          const user: IUser = node as User;
+          this.users.push(user);
+        });
+      }
     });
   }
 }

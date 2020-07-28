@@ -23,19 +23,13 @@ export function createApollo(httpLink: HttpLink) {
 
   const uri = 'https://api.github.com/graphql';
 
-  const basic = setContext((operation, context) => ({
-    headers: {
-      Accept: 'charset=utf-8',
-    },
-  }));
-
   const auth = setContext((operation, context) => ({
     headers: {
       Authorization: `Bearer ${environment.TOKEN}`,
     },
   }));
 
-  const link = ApolloLink.from([basic, auth, httpLink.create({ uri })]);
+  const link = ApolloLink.from([auth, httpLink.create({ uri })]);
 
   return { link, cache, resolvers: {} };
 }

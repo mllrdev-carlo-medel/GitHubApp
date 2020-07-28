@@ -3,6 +3,7 @@ import { IRepository } from 'src/core/interfaces/IRepository';
 import { IPageInfo } from 'src/core/interfaces/IPageInfo';
 import { RepositoryService } from 'src/core/services/repository/repository.service';
 import { QueryRef } from 'apollo-angular';
+import { GetRepositoriesQuery, GetRepositoriesQueryVariables, Repository } from 'src/app/graphql/generated/graphql';
 
 @Component({
   selector: 'app-repository-list',
@@ -13,7 +14,7 @@ export class RepositoryListComponent implements OnInit {
   @Input() loginId!: string;
   @Input() repositories: IRepository[] = [];
   @Input() pageInfo!: IPageInfo;
-  @Input() fetchRepositoriesQuery!: QueryRef<any>;
+  @Input() fetchRepositoriesQuery!: QueryRef<GetRepositoriesQuery, GetRepositoriesQueryVariables>;
   scrollingDown = false;
   disableInfiniteScrolling = false;
 
@@ -24,11 +25,22 @@ export class RepositoryListComponent implements OnInit {
   }
 
   getRepositories(event: { target: { complete: () => void; }; }) {
-    this.fetchRepositoriesQuery = this.repositoryService.getRepositories(this.loginId, this.pageInfo.endCursor, false);
-    this.fetchRepositoriesQuery.valueChanges.subscribe(({ data }) => {
+    this.fetchRepositoriesQuery = this.repositoryService.getRepositories(this.loginId, this.pageInfo.endCursor);
+    this.fetchRepositoriesQuery.valueChanges.subscribe((result) => {
       if (this.scrollingDown && this.pageInfo.hasNextPage) {
-        this.repositories.push(...data.user.repositories.nodes.slice(this.repositories.length));
-        this.pageInfo = data.user.repositories.pageInfo;
+
+        if (result.data.user?.repositories.pageInfo.endCursor) {
+          this.pageInfo = {
+            endCursor: result.data.user?.repositories.pageInfo.endCursor,
+            hasNextPage: result.data.user?.repositories.pageInfo.hasNextPage
+          };
+
+          const repository: IRepository[] = [];
+          result.data.user?.repositories.nodes?.slice(this.repositories.length).map((node) => {
+            const user: IRepository = node as Repository;
+            this.repositories.push(user);
+          });
+        }
 
         if (!this.pageInfo.hasNextPage) {
           this.disableInfiniteScrolling = true;
@@ -37,11 +49,10 @@ export class RepositoryListComponent implements OnInit {
     });
 
     this.getNextRepositories(this.loginId, this.pageInfo.endCursor);
-
     event.target.complete();
   }
 
-  getNextRepositories(id: string, cursor: string) {
+  getNextRepositories(id: string, cursor?: string) {
     if (this.pageInfo.hasNextPage) {
       this.repositoryService.fetchMoreRepositories(this.fetchRepositoriesQuery, this.pageInfo.endCursor);
     }

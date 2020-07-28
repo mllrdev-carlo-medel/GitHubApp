@@ -1,0 +1,15 @@
+query getRepositories($login: String!, $cursor: String) {
+  user(login: $login) @connection(key: "user") {
+    repositories(first: 10, after: $cursor) @connection(key: "repository") {
+      nodes {
+        name
+        id
+        viewerHasStarred
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+    }
+  }
+}

@@ -3,7 +3,9 @@ import { IUser } from 'src/core/interfaces/IUser';
 import { UserService } from 'src/core/services/user/user.service';
 import { IPageInfo } from 'src/core/interfaces/IPageInfo';
 import { QueryRef } from 'apollo-angular';
-import { IonInfiniteScroll } from '@ionic/angular';
+import { map } from 'rxjs/operators';
+import { GetUsersQuery, GetUsersQueryVariables, User } from 'src/app/graphql/generated/graphql';
+import { pipe } from 'rxjs';
 
 @Component({
   selector: 'app-user-list',
@@ -13,24 +15,34 @@ import { IonInfiniteScroll } from '@ionic/angular';
 export class UserListComponent implements OnInit {
   @Input() users: IUser[] = [];
   @Input() pageInfo!: IPageInfo;
-  @Input() fetchUsersQuery!: QueryRef<any>;
+  @Input() fetchUsersQuery!: QueryRef<GetUsersQuery, GetUsersQueryVariables>;
   scrollingDown = false;
-
   disableInfiniteScrolling = false;
 
   constructor(private userService: UserService) {
   }
 
   ngOnInit() {
-     this.getNextUsers(this.pageInfo.endCursor);
+    this.getNextUsers(this.pageInfo.endCursor);
   }
 
   getUsers(event: { target: { complete: () => void; }; }) {
-    this.fetchUsersQuery = this.userService.getUsers(this.pageInfo.endCursor, false);
-    this.fetchUsersQuery.valueChanges.subscribe(({data}) => {
+    this.fetchUsersQuery = this.userService.getUsers(this.pageInfo.endCursor);
+    this.fetchUsersQuery.valueChanges.subscribe((result) => {
       if (this.scrollingDown && this.pageInfo.hasNextPage) {
-        this.users.push(...data.search.nodes.splice(this.users.length));
-        this.pageInfo = data.search.pageInfo;
+
+        if (result.data.search.pageInfo.endCursor) {
+          this.pageInfo = {
+            endCursor: result.data.search.pageInfo.endCursor,
+            hasNextPage: result.data.search.pageInfo.hasNextPage
+          };
+
+          const users: IUser[] = [];
+          result.data.search.nodes?.slice(this.users.length).map(node => {
+            const user: IUser = node as User;
+            this.users.push(user);
+          });
+        }
 
         if (!this.pageInfo.hasNextPage) {
           this.disableInfiniteScrolling = true;
@@ -39,11 +51,10 @@ export class UserListComponent implements OnInit {
     });
 
     this.getNextUsers(this.pageInfo.endCursor);
-
     event.target.complete();
   }
 
-  getNextUsers(cursor: string) {
+  getNextUsers(cursor?: string) {
     if (this.pageInfo.hasNextPage) {
       this.userService.fetchMoreUsers(this.fetchUsersQuery, this.pageInfo.endCursor);
     }

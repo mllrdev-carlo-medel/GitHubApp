@@ -1,4 +1,4 @@
 export interface IPageInfo {
-  endCursor: string;
+  endCursor?: string;
   hasNextPage: boolean;
 }

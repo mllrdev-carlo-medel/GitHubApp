@@ -1,0 +1,16 @@
+query getUsers($cursor: String) {
+  search(query: "a", type: USER, first: 10, after: $cursor)
+    @connection(key: "user") {
+    nodes {
+      __typename
+      ... on User {
+        name
+        login
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}

@@ -1,5 +1,5 @@
 export interface IRepository {
-  name: string;
+  name?: string;
   id: string;
   viewerHasStarred: boolean;
 }
